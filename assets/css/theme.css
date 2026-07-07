@@ -222,13 +222,13 @@ p {
 /* ---- Sidebar ---- */
 
 .sidebar,
-.row > .col-md-2 {
+.sidebar-nav {
   background: var(--bg-sidebar) !important;
   border-right: 1px solid var(--border) !important;
   min-height: 100vh;
 }
 
-.col-md-2 > h5 {
+.sidebar-nav > h5 {
   color: var(--text-secondary) !important;
   font-size: 11px !important;
   font-weight: 700 !important;
@@ -270,7 +270,7 @@ p {
   color: var(--accent) !important;
 }
 
-.col-md-2 hr {
+.sidebar-nav hr {
   border-color: var(--border) !important;
   opacity: 1;
 }

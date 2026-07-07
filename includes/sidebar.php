@@ -50,7 +50,7 @@ $menu_links = ob_get_clean();
     <div class="row">
         
         <!-- DESKTOP SIDEBAR (Hidden on Phones) -->
-        <div class="col-md-2 p-4 d-none d-md-block" style="min-height:100vh; border-right:1px solid #eee;">
+        <div class="col-md-2 sidebar-nav p-4 d-none d-md-block">
             <h5 class="fw-bold mb-4">Navigation</h5>
             <?= $menu_links ?>
         </div>
