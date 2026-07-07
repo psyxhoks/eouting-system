@@ -251,3 +251,5 @@ Cancel
 </a>
 
 </form>
+
+<?php include '../includes/footer.php'; ?>
