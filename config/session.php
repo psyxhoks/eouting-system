@@ -27,5 +27,3 @@ if (
 }
 
 $_SESSION['last_activity'] = time();
-
-?>

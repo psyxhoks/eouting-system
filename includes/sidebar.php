@@ -1,188 +1,59 @@
-<div class="container-fluid">
+<?php 
+$current_page = basename($_SERVER['PHP_SELF']); 
+$link_style = "display:flex; align-items:center; gap:14px; padding:14px 18px; margin-bottom:10px; border-radius:18px; text-decoration:none; font-weight:500; font-size:17px; transition:.2s;"; 
 
-<div class="row">
-
-<div
-class="col-md-2 p-4"
-style="
-background:#F5F5F7;
-min-height:100vh;
-border-right:1px solid #E5E5E7;
-">
-
-<h5
-class="fw-bold mb-4"
-style="color:#1D1D1F;">
-
-Navigation
-
-</h5>
-
-<?php
-
-$current_page = basename($_SERVER['PHP_SELF']);
-
-$link_style = "
-display:flex;
-align-items:center;
-gap:14px;
-padding:14px 18px;
-margin-bottom:10px;
-border-radius:18px;
-text-decoration:none;
-font-weight:500;
-font-size:17px;
-transition:.3s;
-";
-
-function activeStyle($page, $current_page)
-{
-    global $link_style;
-
-    return $link_style .
-    (
-        $current_page == $page
-        ?
-        "background:white;
-        box-shadow:0 5px 15px rgba(0,0,0,.05);
-        color:#D86A6A;"
-        :
-        "color:#1D1D1F;"
-    );
-}
-
-if($_SESSION['role']=="student")
-{
-?>
-
-<a href="../student/dashboard.php" style="<?= activeStyle('dashboard.php',$current_page) ?>">
-<i class="bi bi-house"></i>
-<span>Dashboard</span>
-</a>
-
-<a href="../student/apply_outing.php" style="<?= activeStyle('apply_outing.php',$current_page) ?>">
-<i class="bi bi-pencil-square"></i>
-<span>Apply Outing</span>
-</a>
-
-<a href="../student/my_request.php" style="<?= activeStyle('my_request.php',$current_page) ?>">
-<i class="bi bi-card-list"></i>
-<span>My Requests</span>
-</a>
-
-<a href="../student/qr_pass.php" style="<?= activeStyle('qr_pass.php',$current_page) ?>">
-<i class="bi bi-qr-code"></i>
-<span>QR Pass</span>
-</a>
-
-<a href="../student/compound.php" style="<?= activeStyle('compound.php',$current_page) ?>">
-<i class="bi bi-receipt"></i>
-<span>Compound</span>
-</a>
-
-<a href="../student/sos.php" style="<?= activeStyle('sos.php',$current_page) ?>">
-<i class="bi bi-exclamation-triangle"></i>
-<span>SOS Emergency</span>
-</a>
-
-<?php
-}
-
-elseif($_SESSION['role']=="warden")
-{
-?>
-
-<a href="../warden/dashboard.php" style="<?= activeStyle('dashboard.php',$current_page) ?>">
-<i class="bi bi-house"></i>
-<span>Dashboard</span>
-</a>
-
-<a href="../warden/pending_request.php" style="<?= activeStyle('pending_request.php',$current_page) ?>">
-<i class="bi bi-file-earmark-text"></i>
-<span>Pending Requests</span>
-</a>
-
-<a href="../warden/active_students.php" style="<?= activeStyle('active_students.php',$current_page) ?>">
-<i class="bi bi-people"></i>
-<span>Active Students</span>
-</a>
-
-<a href="../warden/history.php" style="<?= activeStyle('history.php',$current_page) ?>">
-<i class="bi bi-clock-history"></i>
-<span>History</span>
-</a>
-
-<a href="../warden/sos_alert.php" style="<?= activeStyle('sos_alert.php',$current_page) ?>">
-<i class="bi bi-bell"></i>
-<span>SOS Alerts</span>
-</a>
-
-<?php
-}
-
-elseif($_SESSION['role']=="guard")
-{
-?>
-
-<a href="../guard/dashboard.php" style="<?= activeStyle('dashboard.php',$current_page) ?>">
-<i class="bi bi-house"></i>
-<span>Dashboard</span>
-</a>
-
-<a href="../guard/scanner.php" style="<?= activeStyle('scanner.php',$current_page) ?>">
-<i class="bi bi-upc-scan"></i>
-<span>QR Scanner</span>
-</a>
-
-<?php
-}
-
-elseif($_SESSION['role']=="admin")
-{
-?>
-
-<a href="../admin/dashboard.php" style="<?= activeStyle('dashboard.php',$current_page) ?>">
-<i class="bi bi-house"></i>
-<span>Dashboard</span>
-</a>
-
-<a href="../admin/student_monitoring.php" style="<?= activeStyle('student_monitoring.php',$current_page) ?>">
-<i class="bi bi-person-lines-fill"></i>
-<span>Student Monitoring</span>
-</a>
-
-<a href="../admin/user_management.php" style="<?= activeStyle('user_management.php',$current_page) ?>">
-<i class="bi bi-people-fill"></i>
-<span>User Management</span>
-</a>
-
-<a href="../admin/analytics.php" style="<?= activeStyle('analytics.php',$current_page) ?>">
-<i class="bi bi-bar-chart"></i>
-<span>Analytics</span>
-</a>
-
-<a href="../admin/upload_student.php" style="<?= activeStyle('upload_student.php',$current_page) ?>">
-<i class="bi bi-upload"></i>
-<span>Upload Student Data</span>
-</a>
-
-<a
-href="../admin/compound.php"
-style="<?= activeStyle('compound.php',$current_page) ?>">
-
-<i class="bi bi-file-earmark-text"></i>
-
-<span>Compound Management</span>
-
-</a>
-
-<?php
-}
-
-?>
-
+// We capture all the links into a variable so we don't have to type them twice!
+ob_start(); 
+if($_SESSION['role']=="student") { ?>
+    <a href="../student/dashboard.php" class="sidebar-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-house"></i><span>Dashboard</span></a>
+    <a href="../student/apply_outing.php" class="sidebar-link <?= $current_page == 'apply_outing.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-pencil-square"></i><span>Apply Outing</span></a>
+    <a href="../student/my_request.php" class="sidebar-link <?= $current_page == 'my_request.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-card-list"></i><span>My Requests</span></a>
+    <a href="../student/qr_pass.php" class="sidebar-link <?= $current_page == 'qr_pass.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-qr-code"></i><span>QR Pass</span></a>
+    <a href="../student/compound.php" class="sidebar-link <?= $current_page == 'compound.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-receipt"></i><span>Compound</span></a>
+    <a href="../student/sos.php" class="sidebar-link <?= $current_page == 'sos.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-exclamation-triangle"></i><span>SOS Emergency</span></a>
+<?php } elseif($_SESSION['role']=="warden") { ?>
+    <a href="../warden/dashboard.php" class="sidebar-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-house"></i><span>Dashboard</span></a>
+    <a href="../warden/pending_request.php" class="sidebar-link <?= $current_page == 'pending_request.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-file-earmark-text"></i><span>Pending Requests</span></a>
+    <a href="../warden/active_students.php" class="sidebar-link <?= $current_page == 'active_students.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-people"></i><span>Active Students</span></a>
+    <a href="../warden/history.php" class="sidebar-link <?= $current_page == 'history.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-clock-history"></i><span>History</span></a>
+    <a href="../warden/sos_alert.php" class="sidebar-link <?= $current_page == 'sos_alert.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-bell"></i><span>SOS Alerts</span></a>
+<?php } elseif($_SESSION['role']=="guard") { ?>
+    <a href="../guard/dashboard.php" class="sidebar-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-house"></i><span>Dashboard</span></a>
+    <a href="../guard/scanner.php" class="sidebar-link <?= $current_page == 'scanner.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-upc-scan"></i><span>QR Scanner</span></a>
+<?php } elseif($_SESSION['role']=="admin") { ?>
+    <a href="../admin/dashboard.php" class="sidebar-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-house"></i><span>Dashboard</span></a>
+    <a href="../admin/student_monitoring.php" class="sidebar-link <?= $current_page == 'student_monitoring.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-person-lines-fill"></i><span>Student Monitoring</span></a>
+    <a href="../admin/user_management.php" class="sidebar-link <?= $current_page == 'user_management.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-people-fill"></i><span>User Management</span></a>
+    <a href="../admin/analytics.php" class="sidebar-link <?= $current_page == 'analytics.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-bar-chart"></i><span>Analytics</span></a>
+    <a href="../admin/upload_student.php" class="sidebar-link <?= $current_page == 'upload_student.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-upload"></i><span>Upload Student Data</span></a>
+    <a href="../admin/compound.php" class="sidebar-link <?= $current_page == 'compound.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-file-earmark-text"></i><span>Compound Management</span></a>
+<?php } ?>
 <hr>
+<?php 
+// Save the links and clean the output buffer
+$menu_links = ob_get_clean(); 
+?>
 
+<!-- 1. MOBILE OFFCANVAS (Hidden on Laptops) -->
+<div class="offcanvas offcanvas-start p-4 d-md-none" tabindex="-1" id="sidebarMenu">
+    <div class="offcanvas-header border-bottom mb-3 pb-3">
+        <h5 class="offcanvas-title fw-bold">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column">
+        <?= $menu_links ?>
+    </div>
 </div>
 
-<div class="col-md-10 p-4">
+<!-- 2. MAIN LAYOUT CONTAINER -->
+<div class="container-fluid">
+    <div class="row">
+        
+        <!-- DESKTOP SIDEBAR (Hidden on Phones) -->
+        <div class="col-md-2 p-4 d-none d-md-block" style="min-height:100vh; border-right:1px solid #eee;">
+            <h5 class="fw-bold mb-4">Navigation</h5>
+            <?= $menu_links ?>
+        </div>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="col-md-10 p-3 p-md-4">

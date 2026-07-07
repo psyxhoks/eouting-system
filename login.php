@@ -106,9 +106,22 @@ rel="stylesheet">
 
 body
 {
-    background:#F8F9FC;
-    font-family:'Segoe UI';
+
+    /* Set the path to your new background image */
+    background-image: url('assets/images/login-bg.png'); 
+    
+    /* Make sure the image covers the entire screen without stretching */
+    background-size: cover; 
+    
+    /* Keep the image perfectly centered */
+    background-position: center; 
+    
+    /* Prevent the image from repeating like tiles */
+    background-repeat: no-repeat; 
+    
+    font-family: 'Segoe UI';
 }
+
 
 .login-card
 {
@@ -140,7 +153,9 @@ body
 
 .logo
 {
-    width:220px;
+    width:300px;
+    height: auto;
+    margin-bottom:20px;
 }
 
 .btn-login
