@@ -17,13 +17,13 @@
         <div class="d-flex align-items-center">
 
             <?php
-            // NOTIFICATION LOGIC (UNTOUCHED)
-            $count_sql = "SELECT COUNT(*) AS total FROM notifications WHERE user_id=? AND is_read=0";
-            $count_stmt = mysqli_prepare($conn, $count_sql);
-            mysqli_stmt_bind_param($count_stmt, "i", $_SESSION['user_id']);
-            mysqli_stmt_execute($count_stmt);
-            $count_result = mysqli_stmt_get_result($count_stmt);
-            $notification_count = mysqli_fetch_assoc($count_result)['total'];
+            // NOTIFICATION LOGIC (variables prefixed with navbar_ to avoid clobbering the including page's variables)
+            $navbar_count_sql = "SELECT COUNT(*) AS total FROM notifications WHERE user_id=? AND is_read=0";
+            $navbar_count_stmt = mysqli_prepare($conn, $navbar_count_sql);
+            mysqli_stmt_bind_param($navbar_count_stmt, "i", $_SESSION['user_id']);
+            mysqli_stmt_execute($navbar_count_stmt);
+            $navbar_count_result = mysqli_stmt_get_result($navbar_count_stmt);
+            $notification_count = mysqli_fetch_assoc($navbar_count_result)['total'];
             ?>
 
             <div class="dropdown me-3 me-md-4">
@@ -40,13 +40,13 @@
                     <li class="dropdown-header fw-bold">Notifications</li>
                     <li><hr class="dropdown-divider"></li>
                     <?php
-                    $sql = "SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 5";
-                    $stmt = mysqli_prepare($conn, $sql);
-                    mysqli_stmt_bind_param($stmt, "i", $_SESSION['user_id']);
-                    mysqli_stmt_execute($stmt);
-                    $result = mysqli_stmt_get_result($stmt);
+                    $navbar_notif_sql = "SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 5";
+                    $navbar_notif_stmt = mysqli_prepare($conn, $navbar_notif_sql);
+                    mysqli_stmt_bind_param($navbar_notif_stmt, "i", $_SESSION['user_id']);
+                    mysqli_stmt_execute($navbar_notif_stmt);
+                    $navbar_notif_result = mysqli_stmt_get_result($navbar_notif_stmt);
 
-                    while($notification = mysqli_fetch_assoc($result)) {
+                    while($notification = mysqli_fetch_assoc($navbar_notif_result)) {
                     ?>
                         <li>
                             <a href="../<?= $_SESSION['role'] ?>/read_notification.php?id=<?= $notification['id'] ?>" class="dropdown-item">
