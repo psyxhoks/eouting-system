@@ -58,6 +58,10 @@ include '../includes/sidebar.php';
     <?php elseif($_GET['success'] == "graduate"): ?> <div class="alert alert-secondary">Student marked Graduated.</div>
     <?php elseif($_GET['success'] == "batch_activate"): ?> <div class="alert alert-success">Intake marked Active.</div>
     <?php elseif($_GET['success'] == "batch_graduate"): ?> <div class="alert alert-secondary">Intake marked Graduated.</div>
+    <?php elseif($_GET['success'] == "bulk_activate"): ?> <div class="alert alert-success">Selected users marked Active.</div>
+    <?php elseif($_GET['success'] == "bulk_deactivate"): ?> <div class="alert alert-warning">Selected users marked Inactive.</div>
+    <?php elseif($_GET['success'] == "bulk_graduate"): ?> <div class="alert alert-secondary">Selected users marked Graduated.</div>
+    <?php elseif($_GET['success'] == "bulk_reset"): ?> <div class="alert alert-success">Password reset for selected users.</div>
     <?php elseif($_GET['success'] == "update"): ?> <div class="alert alert-success">User updated.</div>
     <?php endif; ?>
 <?php endif; ?>
@@ -95,14 +99,36 @@ include '../includes/sidebar.php';
 
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body">
+
+        <form method="POST" action="bulk_action.php" id="bulkForm" onsubmit="return validateBulkForm()">
+
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <button type="submit" name="bulk_action" value="activate" class="btn btn-sm btn-success">
+                <i class="bi bi-check-circle"></i> Activate Selected
+            </button>
+            <button type="submit" name="bulk_action" value="deactivate" class="btn btn-sm btn-danger">
+                <i class="bi bi-slash-circle"></i> Deactivate Selected
+            </button>
+            <button type="submit" name="bulk_action" value="graduate" class="btn btn-sm btn-secondary">
+                <i class="bi bi-mortarboard"></i> Graduate Selected
+            </button>
+            <button type="submit" name="bulk_action" value="reset_password" class="btn btn-sm btn-info">
+                <i class="bi bi-key"></i> Reset Password for Selected
+            </button>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead>
-                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Programme</th><th>Intake</th><th>Status</th><th>Action</th></tr>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"></th>
+                        <th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Programme</th><th>Intake</th><th>Status</th><th>Action</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <?php while($row = mysqli_fetch_assoc($result)): ?>
                         <tr>
+                            <td><input type="checkbox" name="user_ids[]" value="<?= $row['id'] ?>" class="row-checkbox"></td>
                             <td><?= htmlspecialchars($row['student_id'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($row['fullname'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($row['email'] ?? '-') ?></td>
@@ -142,7 +168,26 @@ include '../includes/sidebar.php';
             </nav>
             <?php endif; ?>
         </div>
+
+        </form>
+
     </div>
 </div>
+
+<script>
+function toggleAllCheckboxes(source) {
+    var checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(function(cb) { cb.checked = source.checked; });
+}
+
+function validateBulkForm() {
+    var checked = document.querySelectorAll('.row-checkbox:checked');
+    if (checked.length === 0) {
+        alert('Please select at least one user first.');
+        return false;
+    }
+    return confirm('Apply this action to ' + checked.length + ' selected user(s)?');
+}
+</script>
 
 <?php include '../includes/footer.php'; ?>

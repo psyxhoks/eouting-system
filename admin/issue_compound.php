@@ -41,8 +41,8 @@ if(isset($_POST['submit']))
     if(empty($reason)) {
         $errors[] = "Reason is required.";
     }
-    if(empty($amount) || !is_numeric($amount) || $amount <= 0) {
-        $errors[] = "Please enter a valid compound amount.";
+    if($amount === "" || !is_numeric($amount) || $amount < 0) {
+        $errors[] = "Please enter a valid compound amount (0 or more).";
     }
     if($warning_given != 1) {
         $errors[] = "You must confirm that a verbal warning has already been given before a compound can be issued.";
