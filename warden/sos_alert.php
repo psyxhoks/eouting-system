@@ -14,14 +14,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'warden')
     exit();
 }
 
+// Handle resolving an alert
+if(isset($_POST['resolve_id']))
+{
+    $resolve_id = $_POST['resolve_id'];
+    $resolver = $_SESSION['user_id'];
+
+    $update_stmt = mysqli_prepare(
+        $conn,
+        "UPDATE sos_alert SET status='Resolved', resolved_by=?, resolved_at=NOW() WHERE id=?"
+    );
+    mysqli_stmt_bind_param($update_stmt, "ii", $resolver, $resolve_id);
+    mysqli_stmt_execute($update_stmt);
+
+    header("Location: sos_alert.php");
+    exit();
+}
+
 include '../includes/header.php';
 include '../includes/navbar.php';
 include '../includes/sidebar.php';
 
 $sql = "
-SELECT *
+SELECT sos_alert.*, users.fullname, users.student_id AS matric_no, users.programme
 FROM sos_alert
-ORDER BY id DESC
+JOIN users ON sos_alert.student_id = users.id
+ORDER BY (sos_alert.status = 'Open') DESC, sos_alert.id DESC
 ";
 
 $result = mysqli_query($conn,$sql);
@@ -56,11 +74,17 @@ Monitor emergency requests submitted by students.
 
 <th>ID</th>
 
-<th>Student ID</th>
+<th>Student</th>
 
 <th>Emergency Message</th>
 
+<th>Location</th>
+
+<th>Time</th>
+
 <th>Status</th>
+
+<th>Action</th>
 
 </tr>
 
@@ -73,21 +97,30 @@ Monitor emergency requests submitted by students.
 <tr>
 
 <td>
-
 #<?php echo $row['id']; ?>
-
 </td>
 
 <td>
-
-<?php echo $row['student_id']; ?>
-
+<div class="fw-semibold"><?php echo htmlspecialchars($row['fullname']); ?></div>
+<small class="text-muted"><?php echo htmlspecialchars($row['matric_no']); ?> &middot; <?php echo htmlspecialchars($row['programme']); ?></small>
 </td>
 
 <td>
+<?php echo nl2br(htmlspecialchars($row['message'])); ?>
+</td>
 
-<?php echo $row['message']; ?>
+<td>
+<?php if(!empty($row['latitude']) && !empty($row['longitude'])) { ?>
+    <a href="https://www.google.com/maps?q=<?php echo $row['latitude']; ?>,<?php echo $row['longitude']; ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-geo-alt-fill"></i> View Map
+    </a>
+<?php } else { ?>
+    <span class="text-muted">Not shared</span>
+<?php } ?>
+</td>
 
+<td>
+<small><?php echo isset($row['created_at']) ? date('d M Y, h:i A', strtotime($row['created_at'])) : '-'; ?></small>
 </td>
 
 <td>
@@ -112,7 +145,7 @@ else
 
 <span class="badge badge-closed px-3 py-2">
 
-Closed
+Resolved
 
 </span>
 
@@ -121,6 +154,19 @@ Closed
 
 ?>
 
+</td>
+
+<td>
+<?php if($row['status']=="Open") { ?>
+    <form method="POST" onsubmit="return confirm('Mark this SOS alert as resolved?');">
+        <input type="hidden" name="resolve_id" value="<?php echo $row['id']; ?>">
+        <button type="submit" class="btn btn-sm btn-success">
+            <i class="bi bi-check-circle"></i> Resolve
+        </button>
+    </form>
+<?php } else { ?>
+    <span class="text-muted">&mdash;</span>
+<?php } ?>
 </td>
 
 </tr>

@@ -24,6 +24,9 @@ if(isset($_POST['submit']))
 
     $message = trim($_POST['message']);
 
+    $latitude = (isset($_POST['latitude']) && $_POST['latitude'] !== '') ? $_POST['latitude'] : null;
+    $longitude = (isset($_POST['longitude']) && $_POST['longitude'] !== '') ? $_POST['longitude'] : null;
+
     if(empty($message))
     {
         echo "<div class='alert alert-danger'>
@@ -35,56 +38,59 @@ if(isset($_POST['submit']))
         $stmt = mysqli_prepare(
             $conn,
             "INSERT INTO sos_alert
-            (student_id, message)
+            (student_id, message, latitude, longitude)
             VALUES
-            (?, ?)"
+            (?, ?, ?, ?)"
         );
 
         mysqli_stmt_bind_param(
             $stmt,
-            "is",
+            "ssss",
             $student_id,
-            $message
+            $message,
+            $latitude,
+            $longitude
         );
 
         if(mysqli_stmt_execute($stmt))
-{
-    $warden_sql =
-    "
-    SELECT id
-    FROM users
-    WHERE role='warden'
-    ";
+        {
+            // Notify all wardens and admins
+            $staff_sql =
+            "
+            SELECT id
+            FROM users
+            WHERE role='warden' OR role='admin'
+            ";
 
-    $warden_result =
-    mysqli_query(
-        $conn,
-        $warden_sql
-    );
+            $staff_result =
+            mysqli_query(
+                $conn,
+                $staff_sql
+            );
 
-    while(
-        $warden =
-        mysqli_fetch_assoc(
-            $warden_result
-        )
-    )
-    {
-    createNotification(
-            $conn,
-            $warden['id'],
-            "SOS Emergency",
-            "A student has sent an SOS emergency alert."
-        );
-    }
+            while(
+                $staff =
+                mysqli_fetch_assoc(
+                    $staff_result
+                )
+            )
+            {
+                createNotification(
+                    $conn,
+                    $staff['id'],
+                    "SOS Emergency",
+                    $_SESSION['fullname'] . " has sent an SOS emergency alert."
+                );
+            }
 
             echo "<div class='alert alert-success'>
-            SOS alert sent successfully.
+            SOS alert sent successfully. Help is on the way.
             </div>";
         }
         else
         {
             echo "<div class='alert alert-danger'>
-            Failed to send SOS alert.
+            Failed to send SOS alert. Please try again or contact the hostel office directly.
             </div>";
         }
     }
@@ -98,13 +104,27 @@ SOS Emergency
 
 </h1>
 
+<p class="text-muted">
+
+Use this only for genuine emergencies. Your location and message will be sent immediately to the warden and admin team.
+
+</p>
+
 <hr>
 
-<div class="card">
+<div class="card border-danger">
 
 <div class="card-body">
 
-<form method="POST">
+<div id="location-status" class="alert alert-secondary d-flex align-items-center gap-2">
+<i class="bi bi-geo-alt"></i>
+<span id="location-text">Getting your location...</span>
+</div>
+
+<form method="POST" id="sosForm">
+
+<input type="hidden" name="latitude" id="latitude">
+<input type="hidden" name="longitude" id="longitude">
 
 <div class="mb-3">
 
@@ -118,6 +138,7 @@ Emergency Message
 name="message"
 class="form-control"
 rows="5"
+placeholder="Briefly describe your emergency (e.g. medical emergency, safety threat, accident)..."
 required></textarea>
 
 </div>
@@ -125,9 +146,10 @@ required></textarea>
 <button
 type="submit"
 name="submit"
-class="btn btn-danger">
+class="btn btn-danger btn-lg w-100"
+style="font-weight:700; letter-spacing:1px;">
 
-Send SOS
+<i class="bi bi-exclamation-triangle-fill me-2"></i>SEND SOS
 
 </button>
 
@@ -136,6 +158,38 @@ Send SOS
 </div>
 
 </div>
+
+<script>
+(function() {
+    var latField = document.getElementById('latitude');
+    var lngField = document.getElementById('longitude');
+    var statusBox = document.getElementById('location-status');
+    var statusText = document.getElementById('location-text');
+
+    if (!navigator.geolocation) {
+        statusBox.classList.remove('alert-secondary');
+        statusBox.classList.add('alert-warning');
+        statusText.textContent = 'Location not supported on this device. You can still send SOS without location.';
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            latField.value = position.coords.latitude;
+            lngField.value = position.coords.longitude;
+            statusBox.classList.remove('alert-secondary');
+            statusBox.classList.add('alert-success');
+            statusText.textContent = 'Location captured. It will be sent with your SOS alert.';
+        },
+        function(error) {
+            statusBox.classList.remove('alert-secondary');
+            statusBox.classList.add('alert-warning');
+            statusText.textContent = 'Location unavailable (permission denied or unsupported). You can still send SOS without location.';
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+    );
+})();
+</script>
 
 <?php
 
