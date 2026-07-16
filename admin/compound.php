@@ -47,6 +47,11 @@ $result = mysqli_stmt_get_result($stmt);
 
 <h2 class="fw-bold mt-3">Compound Management</h2>
 <p class="text-muted">Manage student compounds and payments.</p>
+
+<a href="issue_compound.php" class="btn btn-danger mb-3">
+    <i class="bi bi-file-earmark-plus"></i> Issue Compound
+</a>
+
 <hr>
 
 <form method="GET" class="mb-4">
@@ -75,7 +80,7 @@ $result = mysqli_stmt_get_result($stmt);
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead>
-                    <tr><th>ID</th><th>Student ID</th><th>Reason</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+                    <tr><th>ID</th><th>Student ID</th><th>Reason</th><th>Document</th><th>Warning Given</th><th>Amount</th><th>Status</th><th>Action</th></tr>
                 </thead>
                 <tbody>
                     <?php while($row = mysqli_fetch_assoc($result)): ?>
@@ -83,6 +88,22 @@ $result = mysqli_stmt_get_result($stmt);
                             <td>#<?= htmlspecialchars($row['id']) ?></td>
                             <td><?= htmlspecialchars($row['student_id']) ?></td>
                             <td><?= htmlspecialchars($row['reason']) ?></td>
+                            <td>
+                                <?php if(!empty($row['evidence'])): ?>
+                                    <a href="../uploads/<?= htmlspecialchars($row['evidence']) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-earmark-text"></i> View
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-muted">None</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if($row['warning_given']): ?>
+                                    <span class="badge bg-success">Yes, <?= htmlspecialchars($row['warning_date']) ?></span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">No</span>
+                                <?php endif; ?>
+                            </td>
                             <td>RM <?= number_format($row['amount'], 2) ?></td>
                             <td>
                                 <?php if($row['status'] == "Pending"): ?>

@@ -41,8 +41,8 @@ $stmt_total = mysqli_prepare(
 
 mysqli_stmt_bind_param(
     $stmt_total,
-    "i",
-    $_SESSION['user_id']
+    "s",
+    $_SESSION['student_id']
 );
 
 mysqli_stmt_execute(
@@ -80,8 +80,8 @@ $stmt = mysqli_prepare(
 
 mysqli_stmt_bind_param(
     $stmt,
-    "i",
-    $_SESSION['user_id']
+    "s",
+    $_SESSION['student_id']
 );
 
 mysqli_stmt_execute(
@@ -198,7 +198,13 @@ Outstanding Compound
 
 <td>
 
-<?= $row['evidence'] ?>
+<?php if(!empty($row['evidence'])) { ?>
+<a href="../uploads/<?= htmlspecialchars($row['evidence']) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+<i class="bi bi-file-earmark-text"></i> View
+</a>
+<?php } else { ?>
+<span class="text-muted">None</span>
+<?php } ?>
 
 </td>
 
