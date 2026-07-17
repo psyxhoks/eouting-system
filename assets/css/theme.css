@@ -775,3 +775,84 @@ body.dark-mode ::selection {
    4. Load:    if(localStorage.getItem('theme')==='dark') document.body.classList.add('dark-mode')
    5. header.php already runs step 4 automatically on every page load.
    =========================================== */
+
+
+
+/* ===========================================
+   SECTION 5: MOBILE RESPONSIVENESS
+   Polishes small-screen layout: navbar spacing,
+   heading sizes, and stat cards.
+   =========================================== */
+
+@media (max-width: 767.98px) {
+
+  /* Navbar: tighter spacing, consistent icon sizing */
+  .navbar {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .navbar img[height="42"] {
+    height: 32px !important;
+  }
+
+  .navbar .bi-bell,
+  .navbar .bi-list {
+    font-size: 20px !important;
+  }
+
+  .navbar .dropdown {
+    margin-right: 10px !important;
+  }
+
+  /* Page headings: prevent huge wrapped welcome text */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.35 !important;
+  }
+
+  h2 .bi,
+  h2 + p {
+    font-size: 0.9rem !important;
+  }
+
+  /* Stat cards: 2 per row instead of full-width stacking */
+  .row.g-4 > [class*="col-md-"] {
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .row.g-4 > [class*="col-md-"] .card-body {
+    padding: 1rem !important;
+  }
+
+  .row.g-4 > [class*="col-md-"] .card-body h1 {
+    font-size: 1.75rem !important;
+  }
+
+  .row.g-4 > [class*="col-md-"] .card-body p {
+    font-size: 0.8rem !important;
+  }
+
+  /* Filter/action toolbars: stack cleanly with breathing room */
+  .row.mb-4 > [class*="col-md-"] {
+    margin-bottom: 10px;
+  }
+
+  /* Tables: allow horizontal scroll without breaking layout */
+  .table-responsive {
+    font-size: 0.85rem;
+  }
+
+  /* Cards generally: reduce padding for tighter mobile fit */
+  .card-body {
+    padding: 1.1rem;
+  }
+
+}

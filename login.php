@@ -85,7 +85,7 @@ if(isset($_POST['login']))
 
 <title>
 
-KPTM Hostel Outing System
+KPTM Non Resident /Resident Outing System Management
 
 </title>
 
@@ -174,6 +174,31 @@ body
     transform:translateY(-2px);
 }
 
+@media (max-width: 767px)
+{
+    .left-panel,
+    .right-panel
+    {
+        padding: 30px 24px;
+    }
+
+    .logo
+    {
+        width: 150px;
+        margin-bottom: 12px;
+    }
+
+    .left-panel h2
+    {
+        font-size: 22px;
+    }
+
+    .left-panel p
+    {
+        font-size: 14px;
+    }
+}
+
 </style>
 
 </head>
@@ -198,7 +223,7 @@ class="logo">
 
 <h2 class="mt-4">
 
-Hostel Outing Management System
+Non Resident /Resident Outing System Management
 
 </h2>
 
