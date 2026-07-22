@@ -48,6 +48,10 @@ $result = mysqli_stmt_get_result($stmt);
 <h2 class="fw-bold mt-3">Compound Management</h2>
 <p class="text-muted">Manage student compounds and payments.</p>
 
+<?php if(isset($_GET['success']) && $_GET['success'] == 'delete') { ?>
+<div class="alert alert-danger">Compound record deleted.</div>
+<?php } ?>
+
 <a href="issue_compound.php" class="btn btn-danger mb-3">
     <i class="bi bi-file-earmark-plus"></i> Issue Compound
 </a>
@@ -113,11 +117,16 @@ $result = mysqli_stmt_get_result($stmt);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if($row['status'] == "Pending"): ?>
-                                    <a href="pay_compound.php?id=<?= $row['id'] ?>" class="btn btn-success btn-sm">Mark Paid</a>
-                                <?php else: ?>
-                                    <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                                <?php endif; ?>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <?php if($row['status'] == "Pending"): ?>
+                                        <a href="pay_compound.php?id=<?= $row['id'] ?>" class="btn btn-success btn-sm">Mark Paid</a>
+                                    <?php else: ?>
+                                        <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                    <?php endif; ?>
+                                    <a href="delete_compound.php?id=<?= $row['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this compound record? This cannot be undone.');">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     <?php endwhile; ?>

@@ -30,6 +30,60 @@ if(isset($_POST['resolve_id']))
     exit();
 }
 
+// Handle adding a staff phone number
+if(isset($_POST['add_contact']))
+{
+    $contact_name = trim($_POST['contact_name'] ?? "");
+    $contact_phone = trim($_POST['contact_phone'] ?? "");
+
+    if(!empty($contact_name) && !empty($contact_phone))
+    {
+        $add_stmt = mysqli_prepare(
+            $conn,
+            "INSERT INTO staff_contacts (name, phone_number) VALUES (?, ?)"
+        );
+        mysqli_stmt_bind_param($add_stmt, "ss", $contact_name, $contact_phone);
+        mysqli_stmt_execute($add_stmt);
+    }
+
+    header("Location: emergency_management.php#staff-contacts");
+    exit();
+}
+
+// Handle deleting a staff phone number
+if(isset($_POST['delete_contact_id']))
+{
+    $delete_contact_id = (int)$_POST['delete_contact_id'];
+
+    $delete_stmt = mysqli_prepare(
+        $conn,
+        "DELETE FROM staff_contacts WHERE id=?"
+    );
+    mysqli_stmt_bind_param($delete_stmt, "i", $delete_contact_id);
+    mysqli_stmt_execute($delete_stmt);
+
+    header("Location: emergency_management.php#staff-contacts");
+    exit();
+}
+
+// Handle turning SOS on/off for a specific student
+if(isset($_POST['toggle_sos_id']))
+{
+    $toggle_id = (int)$_POST['toggle_sos_id'];
+    $new_state = (int)$_POST['new_state'];
+
+    $toggle_stmt = mysqli_prepare(
+        $conn,
+        "UPDATE users SET sos_disabled=? WHERE id=? AND role='student'"
+    );
+    mysqli_stmt_bind_param($toggle_stmt, "ii", $new_state, $toggle_id);
+    mysqli_stmt_execute($toggle_stmt);
+
+    $redirect_search = isset($_POST['student_search']) ? "&student_search=" . urlencode($_POST['student_search']) : "";
+    header("Location: emergency_management.php" . "?ok=1" . $redirect_search . "#sos-access");
+    exit();
+}
+
 include '../includes/header.php';
 include '../includes/navbar.php';
 include '../includes/sidebar.php';
@@ -45,6 +99,25 @@ ORDER BY (sos_alert.status = 'Open') DESC, sos_alert.id DESC
 ";
 
 $result = mysqli_query($conn,$sql);
+
+// Staff emergency contacts
+$contacts_result = mysqli_query($conn, "SELECT * FROM staff_contacts ORDER BY name");
+
+// Students for SOS access control
+$student_search = trim($_GET['student_search'] ?? "");
+$student_keyword = "%".$student_search."%";
+
+$students_stmt = mysqli_prepare(
+    $conn,
+    "SELECT id, fullname, student_id, sos_disabled
+    FROM users
+    WHERE role='student' AND (fullname LIKE ? OR student_id LIKE ?)
+    ORDER BY fullname
+    LIMIT 20"
+);
+mysqli_stmt_bind_param($students_stmt, "ss", $student_keyword, $student_keyword);
+mysqli_stmt_execute($students_stmt);
+$students_result = mysqli_stmt_get_result($students_stmt);
 
 ?>
 
@@ -197,6 +270,124 @@ Resolved
 
 </table>
 
+</div>
+
+</div>
+
+</div>
+
+<hr class="my-4">
+
+<div id="staff-contacts" class="card mb-4">
+
+<div class="card-body">
+
+<h4 class="fw-bold mb-1">KPTM Staff Emergency Numbers</h4>
+<p class="text-muted">These numbers are shown to students on the SOS page.</p>
+
+<?php if(isset($_GET['ok'])) { ?>
+<div class="alert alert-success py-2">Saved.</div>
+<?php } ?>
+
+<div class="table-responsive mb-3">
+<table class="table align-middle">
+<thead>
+<tr><th>Name</th><th>Phone Number</th><th>Action</th></tr>
+</thead>
+<tbody>
+<?php if(mysqli_num_rows($contacts_result) === 0) { ?>
+<tr><td colspan="3" class="text-center text-muted py-3">No staff phone numbers added yet.</td></tr>
+<?php } ?>
+<?php while($contact = mysqli_fetch_assoc($contacts_result)) { ?>
+<tr>
+    <td><?php echo htmlspecialchars($contact['name']); ?></td>
+    <td><?php echo htmlspecialchars($contact['phone_number']); ?></td>
+    <td>
+        <form method="POST" onsubmit="return confirm('Delete this phone number?');">
+            <input type="hidden" name="delete_contact_id" value="<?php echo $contact['id']; ?>">
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </form>
+    </td>
+</tr>
+<?php } ?>
+</tbody>
+</table>
+</div>
+
+<form method="POST" class="row g-2 align-items-end">
+    <div class="col-md-4">
+        <label class="form-label">Staff Name</label>
+        <input type="text" name="contact_name" class="form-control" placeholder="e.g. Warden Ahmad" required>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Phone Number</label>
+        <input type="text" name="contact_phone" class="form-control" placeholder="e.g. 013-3535488" required>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" name="add_contact" class="btn btn-primary w-100">
+            <i class="bi bi-plus-circle"></i> Add Number
+        </button>
+    </div>
+</form>
+
+</div>
+
+</div>
+
+<div id="sos-access" class="card mb-4">
+
+<div class="card-body">
+
+<h4 class="fw-bold mb-1">Student SOS Access Control</h4>
+<p class="text-muted">Turn SOS off for a specific student if the case should be settled directly with the office instead. The student can still see staff phone numbers.</p>
+
+<form method="GET" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="student_search" class="form-control" placeholder="Search by name or student ID..." value="<?php echo htmlspecialchars($student_search); ?>">
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+<table class="table align-middle">
+<thead>
+<tr><th>Student ID</th><th>Name</th><th>SOS Status</th><th>Action</th></tr>
+</thead>
+<tbody>
+<?php if(mysqli_num_rows($students_result) === 0) { ?>
+<tr><td colspan="4" class="text-center text-muted py-3">No students found.</td></tr>
+<?php } ?>
+<?php while($student = mysqli_fetch_assoc($students_result)) { ?>
+<tr>
+    <td><?php echo htmlspecialchars($student['student_id']); ?></td>
+    <td><?php echo htmlspecialchars($student['fullname']); ?></td>
+    <td>
+        <?php if($student['sos_disabled']) { ?>
+            <span class="badge bg-secondary">Disabled</span>
+        <?php } else { ?>
+            <span class="badge bg-success">Enabled</span>
+        <?php } ?>
+    </td>
+    <td>
+        <form method="POST" onsubmit="return confirm('<?php echo $student['sos_disabled'] ? 'Re-enable' : 'Disable'; ?> SOS for this student?');">
+            <input type="hidden" name="toggle_sos_id" value="<?php echo $student['id']; ?>">
+            <input type="hidden" name="new_state" value="<?php echo $student['sos_disabled'] ? 0 : 1; ?>">
+            <input type="hidden" name="student_search" value="<?php echo htmlspecialchars($student_search); ?>">
+            <?php if($student['sos_disabled']) { ?>
+                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i> Enable SOS</button>
+            <?php } else { ?>
+                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-slash-circle"></i> Disable SOS</button>
+            <?php } ?>
+        </form>
+    </td>
+</tr>
+<?php } ?>
+</tbody>
+</table>
 </div>
 
 </div>

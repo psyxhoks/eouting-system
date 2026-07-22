@@ -27,6 +27,7 @@ if($_SESSION['role']=="student") { ?>
     <a href="../admin/analytics.php" class="sidebar-link <?= $current_page == 'analytics.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-bar-chart"></i><span>Analytics</span></a>
     <a href="../admin/upload_student.php" class="sidebar-link <?= $current_page == 'upload_student.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-upload"></i><span>Upload Student Data</span></a>
     <a href="../admin/compound.php" class="sidebar-link <?= $current_page == 'compound.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-file-earmark-text"></i><span>Compound Management</span></a>
+    <a href="../admin/emergency_management.php" class="sidebar-link <?= $current_page == 'emergency_management.php' ? 'active' : '' ?>" style="<?= $link_style ?>"><i class="bi bi-exclamation-triangle"></i><span>Emergency Management</span></a>
 <?php } ?>
 <hr>
 <?php 
