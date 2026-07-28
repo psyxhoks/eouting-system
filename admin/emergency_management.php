@@ -84,6 +84,42 @@ if(isset($_POST['toggle_sos_id']))
     exit();
 }
 
+// Handle adding an SOS notification email
+if(isset($_POST['add_notify_email']))
+{
+    $notify_label = trim($_POST['notify_label'] ?? "");
+    $notify_email = trim($_POST['notify_email'] ?? "");
+
+    if(!empty($notify_label) && filter_var($notify_email, FILTER_VALIDATE_EMAIL))
+    {
+        $add_email_stmt = mysqli_prepare(
+            $conn,
+            "INSERT INTO sos_notification_emails (label, email) VALUES (?, ?)"
+        );
+        mysqli_stmt_bind_param($add_email_stmt, "ss", $notify_label, $notify_email);
+        mysqli_stmt_execute($add_email_stmt);
+    }
+
+    header("Location: emergency_management.php#notify-emails");
+    exit();
+}
+
+// Handle deleting an SOS notification email
+if(isset($_POST['delete_notify_email_id']))
+{
+    $delete_email_id = (int)$_POST['delete_notify_email_id'];
+
+    $delete_email_stmt = mysqli_prepare(
+        $conn,
+        "DELETE FROM sos_notification_emails WHERE id=?"
+    );
+    mysqli_stmt_bind_param($delete_email_stmt, "i", $delete_email_id);
+    mysqli_stmt_execute($delete_email_stmt);
+
+    header("Location: emergency_management.php#notify-emails");
+    exit();
+}
+
 include '../includes/header.php';
 include '../includes/navbar.php';
 include '../includes/sidebar.php';
@@ -102,6 +138,9 @@ $result = mysqli_query($conn,$sql);
 
 // Staff emergency contacts
 $contacts_result = mysqli_query($conn, "SELECT * FROM staff_contacts ORDER BY name");
+
+// SOS notification emails (real inboxes that receive SOS alert emails)
+$notify_emails_result = mysqli_query($conn, "SELECT * FROM sos_notification_emails ORDER BY id");
 
 // Students for SOS access control
 $student_search = trim($_GET['student_search'] ?? "");
@@ -165,6 +204,8 @@ Monitor and respond to SOS alerts submitted by students, including those living 
 
 <th>Emergency Message</th>
 
+<th>Contact Number</th>
+
 <th>Location</th>
 
 <th>Time</th>
@@ -181,7 +222,7 @@ Monitor and respond to SOS alerts submitted by students, including those living 
 
 <?php if(mysqli_num_rows($result) === 0) { ?>
 <tr>
-    <td colspan="7" class="text-center text-muted py-4">No SOS alerts have been submitted yet.</td>
+    <td colspan="8" class="text-center text-muted py-4">No SOS alerts have been submitted yet.</td>
 </tr>
 <?php } ?>
 
@@ -200,6 +241,16 @@ Monitor and respond to SOS alerts submitted by students, including those living 
 
 <td>
 <?php echo nl2br(htmlspecialchars($row['message'])); ?>
+</td>
+
+<td>
+<?php if(!empty($row['contact_number'])) { ?>
+    <a href="tel:<?php echo htmlspecialchars($row['contact_number']); ?>" class="fw-semibold text-decoration-none">
+        <i class="bi bi-telephone"></i> <?php echo htmlspecialchars($row['contact_number']); ?>
+    </a>
+<?php } else { ?>
+    <span class="text-muted">Not provided</span>
+<?php } ?>
 </td>
 
 <td>
@@ -328,6 +379,69 @@ Resolved
     <div class="col-md-3">
         <button type="submit" name="add_contact" class="btn btn-primary w-100">
             <i class="bi bi-plus-circle"></i> Add Number
+        </button>
+    </div>
+</form>
+
+</div>
+
+</div>
+
+<div id="notify-emails" class="card mb-4">
+
+<div class="card-body">
+
+<h4 class="fw-bold mb-1">SOS Notification Emails</h4>
+<p class="text-muted">
+Real email addresses that receive an email whenever a student sends an SOS alert.
+This is separate from staff login accounts (e.g. <code>admin@kptm.edu.my</code>) since
+those may just be system credentials rather than inboxes anyone actually checks &mdash;
+add the real staff emails that should be alerted here.
+</p>
+
+<?php if(isset($_GET['ok'])) { ?>
+<div class="alert alert-success py-2">Saved.</div>
+<?php } ?>
+
+<div class="table-responsive mb-3">
+<table class="table align-middle">
+<thead>
+<tr><th>Label / Staff Name</th><th>Email</th><th>Action</th></tr>
+</thead>
+<tbody>
+<?php if(mysqli_num_rows($notify_emails_result) === 0) { ?>
+<tr><td colspan="3" class="text-center text-muted py-3">No notification emails added yet. SOS emails will not be sent to anyone until you add at least one.</td></tr>
+<?php } ?>
+<?php while($notify_email = mysqli_fetch_assoc($notify_emails_result)) { ?>
+<tr>
+    <td><?php echo htmlspecialchars($notify_email['label']); ?></td>
+    <td><?php echo htmlspecialchars($notify_email['email']); ?></td>
+    <td>
+        <form method="POST" onsubmit="return confirm('Remove this email from SOS notifications?');">
+            <input type="hidden" name="delete_notify_email_id" value="<?php echo $notify_email['id']; ?>">
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i> Remove
+            </button>
+        </form>
+    </td>
+</tr>
+<?php } ?>
+</tbody>
+</table>
+</div>
+
+<form method="POST" class="row g-2 align-items-end">
+    <div class="col-md-4">
+        <label class="form-label">Label / Staff Name</label>
+        <input type="text" name="notify_label" class="form-control" placeholder="e.g. Warden Ahmad" required>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="notify_email" class="form-control" placeholder="e.g. ahmad@kptm.edu.my" required>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" name="add_notify_email" class="btn btn-primary w-100">
+            <i class="bi bi-plus-circle"></i> Add Email
         </button>
     </div>
 </form>

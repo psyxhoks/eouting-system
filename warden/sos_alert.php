@@ -78,6 +78,8 @@ Monitor emergency requests submitted by students.
 
 <th>Emergency Message</th>
 
+<th>Contact Number</th>
+
 <th>Location</th>
 
 <th>Time</th>
@@ -107,6 +109,16 @@ Monitor emergency requests submitted by students.
 
 <td>
 <?php echo nl2br(htmlspecialchars($row['message'])); ?>
+</td>
+
+<td>
+<?php if(!empty($row['contact_number'])) { ?>
+    <a href="tel:<?php echo htmlspecialchars($row['contact_number']); ?>" class="fw-semibold text-decoration-none">
+        <i class="bi bi-telephone"></i> <?php echo htmlspecialchars($row['contact_number']); ?>
+    </a>
+<?php } else { ?>
+    <span class="text-muted">Not provided</span>
+<?php } ?>
 </td>
 
 <td>

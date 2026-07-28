@@ -41,27 +41,29 @@ if(isset($_POST['submit']) && !$sos_disabled)
 
     $latitude = (isset($_POST['latitude']) && $_POST['latitude'] !== '') ? $_POST['latitude'] : null;
     $longitude = (isset($_POST['longitude']) && $_POST['longitude'] !== '') ? $_POST['longitude'] : null;
+    $contact_number = trim($_POST['contact_number'] ?? "");
 
     $stmt = mysqli_prepare(
         $conn,
         "INSERT INTO sos_alert
-        (student_id, message, latitude, longitude)
+        (student_id, message, contact_number, latitude, longitude)
         VALUES
-        (?, ?, ?, ?)"
+        (?, ?, ?, ?, ?)"
     );
 
     mysqli_stmt_bind_param(
         $stmt,
-        "ssss",
+        "sssss",
         $student_id,
         $message,
+        $contact_number,
         $latitude,
         $longitude
     );
 
     if(mysqli_stmt_execute($stmt))
     {
-        // Notify all wardens and admins
+        // In-app notification: goes to every warden/admin login account
         $staff_sql =
         "
         SELECT id
@@ -87,6 +89,27 @@ if(isset($_POST['submit']) && !$sos_disabled)
                 $staff['id'],
                 "SOS Emergency",
                 $_SESSION['fullname'] . " has sent an SOS emergency alert."
+            );
+        }
+
+        // Email notification: goes to the real email addresses admin has
+        // registered on the "SOS Notification Emails" list (Emergency
+        // Management page), since login accounts like admin@kptm.edu.my
+        // are not necessarily real inboxes.
+        $notify_email_sql = "SELECT email, label FROM sos_notification_emails ORDER BY id";
+        $notify_email_result = mysqli_query($conn, $notify_email_sql);
+
+        while($notify_row = mysqli_fetch_assoc($notify_email_result))
+        {
+            sendSosEmail(
+                $notify_row['email'],
+                $notify_row['label'],
+                $_SESSION['fullname'],
+                $_SESSION['student_id'] ?? '',
+                $contact_number,
+                $message,
+                $latitude,
+                $longitude
             );
         }
 
@@ -174,6 +197,25 @@ Use this only for genuine emergencies. Your location and message will be sent im
 
 <input type="hidden" name="latitude" id="latitude">
 <input type="hidden" name="longitude" id="longitude">
+
+<div class="mb-3">
+
+<label class="form-label">
+
+Your Contact Number <span class="text-danger">*</span>
+
+</label>
+
+<input
+type="tel"
+name="contact_number"
+class="form-control"
+placeholder="e.g. 012-3456789"
+required>
+
+<small class="text-muted">The admin/warden will use this number to call you back.</small>
+
+</div>
 
 <div class="mb-3">
 
