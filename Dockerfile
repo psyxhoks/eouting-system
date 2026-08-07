@@ -1,5 +1,15 @@
 FROM php:8.2-apache
-RUN docker-php-ext-install mysqli
+
+# Install system libraries required by the GD extension, then enable GD + mysqli
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd mysqli \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY . /var/www/html/
 
 # Ensure www-data (the user Apache runs as) can write to upload/output folders
